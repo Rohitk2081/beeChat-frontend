@@ -1,0 +1,28 @@
+body {
+    background: linear-gradient(135deg, #f2f6fc, #dbe9f4);
+  }
+  
+  .chat-box {
+    height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .message {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-wrap: break-word;
+  }
+  
+  .sent {
+    background-color: #d1e7dd;
+    align-self: flex-end;
+    text-align: right;
+  }
+  
+  .received {
+    background-color: #f8d7da;
+    align-self: flex-start;
+    text-align: left;
+  }
