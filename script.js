@@ -1,4 +1,4 @@
-const socket = io("https://beechat-backend.onrender.com/"); // Update if needed
+const socket = io("https://beechat-backend.onrender.com/");
 let username = prompt("Enter your name (Buzz or Bee):");
 
 function sendMessage() {
@@ -31,3 +31,10 @@ socket.on("chat message", (data) => {
 if (Notification.permission !== "granted") {
   Notification.requestPermission();
 }
+
+// 🔥 Send message on Enter key
+document.getElementById("messageInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
