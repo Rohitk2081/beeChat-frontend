@@ -3,7 +3,7 @@ body {
   }
   
   .chat-box {
-    height: 70vh;
+    height: 65vh;
     overflow-y: auto;
   }
   
@@ -16,7 +16,7 @@ body {
   }
   
   .sent {
-    background-color:  #a6b3e9;
+    background-color: #a6b3e9;
     align-self: flex-end;
     text-align: right;
   }
@@ -25,4 +25,47 @@ body {
     background-color: #f8d7da;
     align-self: flex-start;
     text-align: left;
+  }
+
+  /* General dark theme */
+  .dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  .dark-mode .card {
+    background-color: #1e1e1e;
+    border: none;
+  }
+  
+  .dark-mode h5 {
+    color: #ffffff;
+  }
+  
+  .dark-mode .chat-box {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #333;
+  }
+  
+  .dark-mode .sent {
+    background-color: #2e2e2e;
+    color: #ffffff;
+  }
+  
+  .dark-mode .received {
+    background-color: #3a3a3a;
+    color: #ffffff;
+  }
+  
+  .dark-mode input,
+  .dark-mode .form-control,
+  .dark-mode .btn {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444;
+  }
+  
+  .dark-mode .btn:hover {
+    background-color: #333;
   }
