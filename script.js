@@ -1,4 +1,4 @@
-const socket = io("http://localhost:3000");
+const socket = io("https://beechat-backend.onrender.com");
 let username = prompt("Enter your name (Buzz or Bee):");
 
 function sendMessage() {
