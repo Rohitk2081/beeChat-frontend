@@ -1,6 +1,7 @@
 const socket = io("https://beechat-backend.onrender.com");
 let username = prompt("Enter your name (Buzz or Bee):");
 
+// Function for sending regular text messages
 function sendMessage() {
   const input = document.getElementById("messageInput");
   const message = input.value.trim();
@@ -11,24 +12,110 @@ function sendMessage() {
     input.value = "";
   }
 }
+
+// Updated function to send images using chunking
 function sendImage() {
   const input = document.getElementById("imageInput");
   const file = input.files[0];
+  
   if (file && file.type.startsWith("image/")) {
+    // Create loading indicator
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "message sent";
+    loadingDiv.innerHTML = `<strong>${username}:</strong><br>Sending image... <span id="upload-progress">0%</span>`;
+    document.getElementById("messages").appendChild(loadingDiv);
+    loadingDiv.scrollIntoView({ behavior: "smooth" });
+    
     const reader = new FileReader();
-    reader.onload = function (e) {
-      const imageData = {
-        user: username,
-        img: e.target.result // base64 image
-      };
-      socket.emit("chat image", imageData);
-      appendImage(imageData, "sent");
-      input.value = ""; // clear input
+    reader.onload = async function(e) {
+      const imageData = e.target.result; // base64 image
+      
+      try {
+        // Send the image in chunks
+        await sendLargeImage(imageData, file.name, file.type, loadingDiv);
+        
+        // Create an entry in the local chat for the sent image
+        const localImgData = {
+          user: username,
+          img: imageData
+        };
+        
+        // Replace loading indicator with the actual image
+        loadingDiv.innerHTML = `<strong>${username}:</strong><br><img src="${imageData}" class="img-fluid rounded" style="max-width: 200px;" />`;
+        
+        input.value = ""; // clear input
+      } catch (error) {
+        console.error("Error sending image:", error);
+        loadingDiv.innerHTML = `<strong>${username}:</strong><br>Failed to send image. ${error.message}`;
+      }
     };
+    
     reader.readAsDataURL(file);
   } else {
     alert("Please select a valid image file.");
   }
+}
+
+// Function to send large images by splitting them into chunks
+function sendLargeImage(imageData, fileName, fileType, loadingElement) {
+  return new Promise((resolve, reject) => {
+    // Set chunk size (100KB)
+    const chunkSize = 100000;
+    
+    // Generate a unique ID for this file transfer
+    const fileId = 'img_' + Date.now();
+    
+    // Calculate total chunks
+    const totalChunks = Math.ceil(imageData.length / chunkSize);
+    
+    // Send metadata first
+    socket.emit('image-metadata', {
+      fileId: fileId,
+      fileName: fileName,
+      fileType: fileType,
+      totalChunks: totalChunks,
+      fileSize: imageData.length,
+      user: username
+    });
+    
+    // Send each chunk with a small delay to prevent overwhelming the connection
+    let chunkIndex = 0;
+    
+    const sendNextChunk = () => {
+      if (chunkIndex >= totalChunks) {
+        resolve();
+        return;
+      }
+      
+      const start = chunkIndex * chunkSize;
+      const end = Math.min(start + chunkSize, imageData.length);
+      const chunk = imageData.slice(start, end);
+      
+      // Send the chunk
+      socket.emit('image-chunk', {
+        fileId: fileId,
+        chunkIndex: chunkIndex,
+        chunk: chunk,
+        last: chunkIndex === totalChunks - 1
+      });
+      
+      // Update progress indicator
+      const progress = Math.floor((chunkIndex + 1) / totalChunks * 100);
+      if (loadingElement) {
+        const progressSpan = loadingElement.querySelector("#upload-progress");
+        if (progressSpan) {
+          progressSpan.textContent = `${progress}%`;
+        }
+      }
+      
+      chunkIndex++;
+      
+      // Use a small delay between chunks
+      setTimeout(sendNextChunk, 50);
+    };
+    
+    sendNextChunk();
+  });
 }
 
 function appendImage(data, type) {
@@ -39,9 +126,12 @@ function appendImage(data, type) {
   msgDiv.scrollIntoView({ behavior: "smooth" });
 }
 
-// Receive image
-socket.on("chat image", (data) => {
-  appendImage(data, "received");
+// Receive complete image
+socket.on("image-complete", (data) => {
+  appendImage({
+    user: data.user,
+    img: data.imageData
+  }, "received");
 });
 
 function appendMessage(data, type) {
@@ -54,7 +144,6 @@ function appendMessage(data, type) {
 
 socket.on("chat message", (data) => {
   appendMessage(data, "received");
-
   if (document.hidden && Notification.permission === "granted") {
     new Notification(`${data.user} says:`, { body: data.msg });
   }
@@ -70,10 +159,10 @@ document.getElementById("messageInput").addEventListener("keydown", (e) => {
     sendMessage();
   }
 });
+
 socket.on("user status", (data) => {
   const indicator = document.getElementById("status-indicator");
   const text = document.getElementById("status-text");
-
   if (data.online) {
     indicator.style.backgroundColor = "green";
     text.innerText = "Someone is online";
@@ -82,9 +171,9 @@ socket.on("user status", (data) => {
     text.innerText = "No one else is online";
   }
 });
+
 function saveConversation() {
   const chatBox = document.getElementById("messages");
-
   // Use html2canvas to capture the entire chat box including all messages (even if it's scrolled)
   html2canvas(chatBox, {
     scrollX: 0, // Ensure scrolling doesn't affect the capture
@@ -97,13 +186,12 @@ function saveConversation() {
     link.click(); // Trigger the download
   });
 }
+
 // Theme toggle
 // document.getElementById("themeToggle").addEventListener("click", () => {
 //   document.body.classList.toggle("dark-mode");
-
 //   const isDark = document.body.classList.contains("dark-mode");
 //   document.getElementById("themeToggle").textContent = isDark ? "☀️" : "🌙";
-
 //   // Optionally store preference
 //   localStorage.setItem("chatTheme", isDark ? "dark" : "light");
 // });
