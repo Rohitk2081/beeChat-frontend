@@ -1,4 +1,5 @@
 const socket = io("https://beechat-backend.onrender.com");
+// const socket = io("http://localhost:3000");
 let username = prompt("Enter your name (Buzz or Bee):");
 
 // Function for sending regular text messages
@@ -21,7 +22,7 @@ function sendImage() {
   if (file && file.type.startsWith("image/")) {
     // Create loading indicator
     const loadingDiv = document.createElement("div");
-    loadingDiv.className = "message sent";
+    loadingDiv.className = "message sent upload-progress";
     loadingDiv.innerHTML = `<strong>${username}:</strong><br>Sending image... <span id="upload-progress">0%</span>`;
     document.getElementById("messages").appendChild(loadingDiv);
     loadingDiv.scrollIntoView({ behavior: "smooth" });
@@ -42,11 +43,13 @@ function sendImage() {
         
         // Replace loading indicator with the actual image
         loadingDiv.innerHTML = `<strong>${username}:</strong><br><img src="${imageData}" class="img-fluid rounded" style="max-width: 200px;" />`;
+        loadingDiv.classList.remove("upload-progress");
         
         input.value = ""; // clear input
       } catch (error) {
         console.error("Error sending image:", error);
         loadingDiv.innerHTML = `<strong>${username}:</strong><br>Failed to send image. ${error.message}`;
+        loadingDiv.classList.remove("upload-progress");
       }
     };
     
@@ -187,20 +190,26 @@ function saveConversation() {
   });
 }
 
-// Theme toggle
-// document.getElementById("themeToggle").addEventListener("click", () => {
-//   document.body.classList.toggle("dark-mode");
-//   const isDark = document.body.classList.contains("dark-mode");
-//   document.getElementById("themeToggle").textContent = isDark ? "☀️" : "🌙";
-//   // Optionally store preference
-//   localStorage.setItem("chatTheme", isDark ? "dark" : "light");
-// });
+// Theme toggle functionality
+document.getElementById("themeToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  const isDark = document.body.classList.contains("dark-mode");
+  document.getElementById("themeToggle").textContent = isDark ? "☀️" : "🌙";
+  // Store preference
+  localStorage.setItem("chatTheme", isDark ? "dark" : "light");
+});
 
-// // Load saved theme on page load
-// window.addEventListener("DOMContentLoaded", () => {
-//   const savedTheme = localStorage.getItem("chatTheme");
-//   if (savedTheme === "dark") {
-//     document.body.classList.add("dark-mode");
-//     document.getElementById("themeToggle").textContent = "☀️";
-//   }
-// });
+// Load saved theme on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("chatTheme");
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-mode");
+    document.getElementById("themeToggle").textContent = "☀️";
+  }
+});
+
+
+       
+     
+ 
+
