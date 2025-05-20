@@ -1,6 +1,23 @@
+// script.js - Updated to work with MongoDB Atlas integration
+
+// You can switch between production and development servers
 const socket = io("https://beechat-backend.onrender.com");
 // const socket = io("http://localhost:3000");
+
 let username = prompt("Enter your name (Buzz or Bee):");
+if (!username) username = "Anonymous" + Math.floor(Math.random() * 1000);
+
+// Function to load chat history when page loads
+window.addEventListener("DOMContentLoaded", () => {
+  // History will now be loaded automatically from server when socket connects
+  
+  // Load saved theme
+  const savedTheme = localStorage.getItem("chatTheme");
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-mode");
+    document.getElementById("themeToggle").textContent = "☀️";
+  }
+});
 
 // Function for sending regular text messages
 function sendMessage() {
@@ -34,12 +51,6 @@ function sendImage() {
       try {
         // Send the image in chunks
         await sendLargeImage(imageData, file.name, file.type, loadingDiv);
-        
-        // Create an entry in the local chat for the sent image
-        const localImgData = {
-          user: username,
-          img: imageData
-        };
         
         // Replace loading indicator with the actual image
         loadingDiv.innerHTML = `<strong>${username}:</strong><br><img src="${imageData}" class="img-fluid rounded" style="max-width: 200px;" />`;
@@ -198,18 +209,3 @@ document.getElementById("themeToggle").addEventListener("click", () => {
   // Store preference
   localStorage.setItem("chatTheme", isDark ? "dark" : "light");
 });
-
-// Load saved theme on page load
-window.addEventListener("DOMContentLoaded", () => {
-  const savedTheme = localStorage.getItem("chatTheme");
-  if (savedTheme === "dark") {
-    document.body.classList.add("dark-mode");
-    document.getElementById("themeToggle").textContent = "☀️";
-  }
-});
-
-
-       
-     
- 
-
