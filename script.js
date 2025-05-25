@@ -57,18 +57,18 @@ function updateConnectionStatus(connected) {
     document.body.appendChild(statusDiv);
   }
   
-  const statusEl = document.getElementById('connection-status');
-  if (connected) {
-    statusEl.textContent = '🟢 Connected';
-    statusEl.style.backgroundColor = '#d4edda';
-    statusEl.style.color = '#155724';
-    statusEl.style.border = '1px solid #c3e6cb';
-  } else {
-    statusEl.textContent = '🔴 Disconnected';
-    statusEl.style.backgroundColor = '#f8d7da';
-    statusEl.style.color = '#721c24';
-    statusEl.style.border = '1px solid #f5c6cb';
-  }
+  // const statusEl = document.getElementById('connection-status');
+  // if (connected) {
+  //   statusEl.textContent = '🟢 Connected';
+  //   statusEl.style.backgroundColor = '#d4edda';
+  //   statusEl.style.color = '#155724';
+  //   statusEl.style.border = '1px solid #c3e6cb';
+  // } else {
+  //   statusEl.textContent = '🔴 Disconnected';
+  //   statusEl.style.backgroundColor = '#f8d7da';
+  //   statusEl.style.color = '#721c24';
+  //   statusEl.style.border = '1px solid #f5c6cb';
+  // }
 }
 
 // Function to load chat history when page loads
